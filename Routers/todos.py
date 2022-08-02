@@ -25,8 +25,11 @@ templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse(name="home.html", context={"request": request})
+async def read_user_todos(request: Request,
+                          session: Session = Depends(get_session)):
+    todos = get_all_todos(session)
+    return templates.TemplateResponse(name="home.html",
+                                      context={"request": request, "todos":todos})
 
 
 @router.get("/add-todo", response_class=HTMLResponse)
