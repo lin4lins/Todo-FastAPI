@@ -9,14 +9,24 @@ from Database.db_properties import get_session
 from Exceptions import (get_todo_not_found_exception,
                         get_user_do_not_have_todos_exception,
                         get_user_exception)
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.params import Path, Query
 from Models.Todo import RawTodo
 from Models.User import CurrentUser
 from sqlalchemy.orm import Session
 
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 router = APIRouter(prefix="/todos", tags=["todo"],
                    responses={404: {"description": "Not found"}})
+
+templates = Jinja2Templates(directory="templates")
+
+
+@router.get("/test")
+async def home(request: Request):
+    return templates.TemplateResponse(name="home.html", context={"request": request})
 
 
 @router.get("/all", deprecated=True)
