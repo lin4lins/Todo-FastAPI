@@ -1,11 +1,11 @@
 from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import Depends, FastAPI
 
 from Company import companyapis, dependencies
 from Database.db_properties import Base, engine
 from Routers import auth, todos, users
-
-load_dotenv()
 
 app = FastAPI()
 app.include_router(auth.router)
