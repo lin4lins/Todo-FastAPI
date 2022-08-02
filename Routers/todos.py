@@ -24,9 +24,19 @@ router = APIRouter(prefix="/todos", tags=["todo"],
 templates = Jinja2Templates(directory="templates")
 
 
-@router.get("/test")
+@router.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse(name="home.html", context={"request": request})
+
+
+@router.get("/add-todo", response_class=HTMLResponse)
+async def add_todo(request: Request):
+    return templates.TemplateResponse(name="add-todo.html", context={"request": request})
+
+
+@router.get("/edit-todo", response_class=HTMLResponse)
+async def edit_todo(request: Request):
+    return templates.TemplateResponse(name="edit-todo.html", context={"request": request})
 
 
 @router.get("/all", deprecated=True)

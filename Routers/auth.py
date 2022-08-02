@@ -6,13 +6,27 @@ from Authorization.token_manager import get_token
 from Database.db_init import DatabaseUser
 from Database.db_properties import get_session
 from Exceptions import get_token_exception
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.templating import Jinja2Templates
 from Models.User import RawUser
 from sqlalchemy.orm import Session
 
+from Routers.todos import templates
+
 router = APIRouter(tags=["auth"],
                    responses={401: {"user": "Not authorized"}})
+
+
+@router.get("/", response_class=HTMLResponse)
+async def authpage(request: Request):
+    return templates.TemplateResponse(name="login.html", context={"request": request})
+
+
+@router.get("/register", response_class=HTMLResponse)
+async def regpage(request: Request):
+    return templates.TemplateResponse(name="register.html", context={"request": request})
 
 
 @router.post("/signin", status_code=201)
