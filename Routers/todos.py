@@ -1,5 +1,7 @@
 from typing import Union
 
+from starlette.responses import RedirectResponse
+
 from Authorization.token_manager import get_current_user
 from Database.db_init import DatabaseTodo
 from Database.db_manager import (get_all_todos,
@@ -9,7 +11,7 @@ from Database.db_properties import get_session
 from Exceptions import (get_todo_not_found_exception,
                         get_user_do_not_have_todos_exception,
                         get_user_exception)
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Form
 from fastapi.params import Path, Query
 from Models.Todo import RawTodo
 from Models.User import CurrentUser
@@ -17,6 +19,7 @@ from sqlalchemy.orm import Session
 
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from starlette import status
 
 router = APIRouter(prefix="/todos", tags=["todo"],
                    responses={404: {"description": "Not found"}})
@@ -32,16 +35,48 @@ async def read_user_todos(request: Request,
                                       context={"request": request, "todos": todos})
 
 
-@router.get("/add-todo", response_class=HTMLResponse)
+@router.get("/add", response_class=HTMLResponse)
 async def add_todo(request: Request):
     return templates.TemplateResponse(name="add-todo.html", context={"request": request})
 
 
-@router.get("/edit-todo", response_class=HTMLResponse)
-async def edit_todo(request: Request):
-    return templates.TemplateResponse(name="edit-todo.html", context={"request": request})
+@router.post("/add", response_class=HTMLResponse)
+async def add_new_todo(request: Request, title: str = Form(...),
+                       description: str = Form(...), priority: int = Form(...),
+                       session: Session = Depends(get_session)):
+    todo_to_create = DatabaseTodo(title=title, description=description,
+                                  priority=priority, complete=False,
+                                  owner_id=1)
+    session.add(todo_to_create)
+    session.flush()
+    session.commit()
+    return RedirectResponse(url="/todos/read", status_code=status.HTTP_302_FOUND)
 
 
+@router.get("/edit/{id}", response_class=HTMLResponse)
+async def edit_todo(request: Request, id: int = Path(...),
+                    session: Session = Depends(get_session)):
+    todo_to_update = get_todo_by_id_and_user_id(id, 1, session)
+
+    return templates.TemplateResponse(name="edit-todo.html",
+                                      context={"request": request,
+                                               "todo": todo_to_update})
+
+
+@router.post("/edit/{id}", response_class=HTMLResponse)
+async def edit_todo(request: Request, id: int = Path(...), title: str = Form(...),
+                    description: str = Form(...), priority: int = Form(...),
+                    session: Session = Depends(get_session)):
+    todo_to_update = get_todo_by_id_and_user_id(id, 1, session)
+
+    todo_to_update.title = title
+    todo_to_update.description = description
+    todo_to_update.priority = priority
+    session.commit()
+    return RedirectResponse(url="/todos/read", status_code=status.HTTP_302_FOUND)
+
+
+# ----------- fastAPI METHODS
 @router.get("/all", deprecated=True)
 async def read_all_todos(session: Session = Depends(get_session)) \
         -> Union[list[DatabaseTodo], None]:
