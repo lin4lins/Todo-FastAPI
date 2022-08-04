@@ -40,12 +40,11 @@ async def add_todo(request: Request):
     return templates.TemplateResponse(name="add-todo.html", context={"request": request})
 
 
-@router.post("/add", response_class=HTMLResponse)
-async def add_new_todo(request: Request, title: str = Form(...),
-                       description: str = Form(...), priority: int = Form(...),
+@router.post("/add")
+async def add_new_todo(todo: RawTodo,
                        session: Session = Depends(get_session)):
-    todo_to_create = DatabaseTodo(title=title, description=description,
-                                  priority=priority, complete=False,
+    todo_to_create = DatabaseTodo(title=todo.title, description=todo.description,
+                                  priority=todo.priority, complete=todo.complete,
                                   owner_id=1)
     session.add(todo_to_create)
     session.flush()
@@ -63,15 +62,14 @@ async def edit_todo(request: Request, id: int = Path(...),
                                                "todo": todo_to_update})
 
 
-@router.post("/edit/{id}", response_class=HTMLResponse)
-async def edit_todo(request: Request, id: int = Path(...), title: str = Form(...),
-                    description: str = Form(...), priority: int = Form(...),
+@router.post("/edit/{id}")
+async def edit_todo(todo: RawTodo, id: int = Path(...),
                     session: Session = Depends(get_session)):
     todo_to_update = get_todo_by_id_and_user_id(id, 1, session)
 
-    todo_to_update.title = title
-    todo_to_update.description = description
-    todo_to_update.priority = priority
+    todo_to_update.title = todo.title
+    todo_to_update.description = todo.description
+    todo_to_update.priority = todo.priority
     session.commit()
     return RedirectResponse(url="/todos/read", status_code=status.HTTP_302_FOUND)
 
