@@ -1,4 +1,4 @@
-function myFunction() {
+function send_todo() {
 
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "http://127.0.0.1:8000/todos/add");
@@ -7,12 +7,18 @@ function myFunction() {
 
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
-      if  (xhr.status == 200) {
-        window.location.replace("/todos/read");
-      }
-        console.log(xhr.status);
-        console.log(xhr.responseText);
+        var response = xhr.responseText;
+        if (response == "null") {
+            return;
+        };
 
+        var jsonResponse = JSON.parse(response);
+        if  (xhr.status == 200 && jsonResponse.url) {
+            window.location.replace(jsonResponse.url);
+        }
+        else {
+            alert("Error is occurred by todo creation. Reload page and try again");
+        };
       }};
 
     let data = {
