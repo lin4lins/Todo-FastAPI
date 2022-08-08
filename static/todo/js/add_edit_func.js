@@ -1,7 +1,7 @@
-function send_todo() {
+function send_todo(url) {
 
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "http://127.0.0.1:8000/todos/add");
+    xhr.open("POST", url);
     xhr.setRequestHeader("Accept", "application/json");
     xhr.setRequestHeader("Content-Type", "application/json");
 
@@ -28,4 +28,32 @@ function send_todo() {
     };
 
     xhr.send(JSON.stringify(data));
+}
+
+function add_todo() {
+    var url = "http://127.0.0.1:8000/todos/add";
+    send_todo(url);
+}
+
+function edit_todo() {
+    var todo_id = get_todo_id_from_url();
+    var todo_id_str = todo_id.toString();
+    var url = "http://127.0.0.1:8000/todos/edit"+"/"+todo_id_str;
+    send_todo(url);
+}
+
+function delete_todo() {
+    var todo_id = get_todo_id_from_url();
+    var todo_id_str = todo_id.toString();
+    var url = "http://127.0.0.1:8000/todos/delete"+"/"+todo_id_str;
+    send_todo(url);
+}
+
+
+function get_todo_id_from_url() {
+    var pathname = window.location.pathname;
+    var re = /\d+/g;
+    var found_array = pathname.match(re);
+    var id = found_array[0];
+    return id
 }
