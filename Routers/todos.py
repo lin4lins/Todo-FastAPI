@@ -1,7 +1,5 @@
 from typing import Union
 
-from starlette.responses import RedirectResponse
-
 from Authorization.token_manager import get_current_user
 from Database.db_init import DatabaseTodo
 from Database.db_manager import (get_all_todos,
@@ -19,7 +17,6 @@ from sqlalchemy.orm import Session
 
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from starlette import status
 
 router = APIRouter(prefix="/todos", tags=["todo"],
                    responses={404: {"description": "Not found"}})
@@ -41,7 +38,7 @@ async def add_todo(request: Request):
 
 
 @router.post("/add")
-async def add_new_todo(todo: RawTodo,
+async def add_todo(todo: RawTodo,
                        session: Session = Depends(get_session)):
     todo_to_create = DatabaseTodo(title=todo.title, description=todo.description,
                                   priority=todo.priority, complete=todo.complete,
@@ -49,7 +46,8 @@ async def add_new_todo(todo: RawTodo,
     session.add(todo_to_create)
     session.flush()
     session.commit()
-    return RedirectResponse(url="/todos/read", status_code=status.HTTP_302_FOUND)
+    if todo_to_create.id:
+        return {"url": "/todos/read"}
 
 
 @router.get("/edit/{id}", response_class=HTMLResponse)
