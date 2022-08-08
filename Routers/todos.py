@@ -25,8 +25,7 @@ templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/read", response_class=HTMLResponse)
-async def read_user_todos(request: Request,
-                          session: Session = Depends(get_session)):
+async def read_todos(request: Request, session: Session = Depends(get_session)):
     todos = get_all_todos(session)
     return templates.TemplateResponse(name="home.html",
                                       context={"request": request, "todos": todos})
@@ -69,7 +68,16 @@ async def edit_todo(todo: RawTodo, id: int = Path(...),
     todo_to_update.description = todo.description
     todo_to_update.priority = todo.priority
     session.commit()
-    return RedirectResponse(url="/todos/read", status_code=status.HTTP_302_FOUND)
+    return {"url": "/todos/read"}
+
+
+@router.post("/delete/{id}")
+async def delete_todo(id: int = Path(...),
+                       session: Session = Depends(get_session)):
+    todo_to_delete = get_todo_by_id_and_user_id(id, 1, session)
+    session.delete(todo_to_delete)
+    session.commit()
+    return {"url": "/todos/read"}
 
 
 # ----------- fastAPI METHODS
