@@ -6,20 +6,20 @@
              Let's edit your todo!
         </div>
         <div class="card-body">
-            <form method="POST">
+            <form>
                 <div class="form-group">
                     <label>Title</label>
-                    <input type="text" class="form-control" name="title"
+                    <input id="title" type="text" class="form-control" name="title"
                            value="{{todo.title}}" required>
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea class="form-control"rows="3" name="description"
+                    <textarea id="description" class="form-control"rows="3" name="description"
                               required>{{todo.description}}</textarea>
                 </div>
                 <div class="form-group">
                     <label>Priority</label>
-                    <select class="form-control" name="priority">
+                    <select id="priority" class="form-control" name="priority">
                         <option {% if todo.priority == 1 %} selected="selected" {% endif %}
                         >1</option>
                         <option {% if todo.priority == 2 %} selected="selected" {% endif %}
@@ -32,7 +32,8 @@
                         >5</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary">Edit todo</button>
+                <button onclick="edit_todo()" type="button" class="btn btn-primary">Edit todo</button>
+                <button onclick="delete_todo()" type="button" class="btn btn-danger">Delete todo</button>
             </form>
         </div>
     </div>
