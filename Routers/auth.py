@@ -9,7 +9,6 @@ from Exceptions import get_token_exception
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.templating import Jinja2Templates
 from Models.User import RawUser
 from sqlalchemy.orm import Session
 
