@@ -70,3 +70,13 @@ function delete_todo() {
     var url = "http://127.0.0.1:8000/todos/delete"+"/"+todo_id_str;
     send_http_request(method, url);
 }
+
+function set_todo_complete(todo_id) {
+    var method = "PUT";
+    var url = "http://127.0.0.1:8000/todos/complete"+"/"+todo_id;
+
+    var todo_status = {
+        "completed": true
+    };
+    send_http_request(method, url, todo_status);
+}
