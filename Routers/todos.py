@@ -31,14 +31,8 @@ async def add_todo(request: Request):
 @router.post("/add")
 async def add_todo(todo: RawTodo,
                        session: Session = Depends(get_session)):
-    todo_to_create = DatabaseTodo(title=todo.title, description=todo.description,
-                                  priority=todo.priority, complete=todo.complete,
-                                  owner_id=1)
-    session.add(todo_to_create)
-    session.flush()
-    session.commit()
-    if todo_to_create.id:
-        return {"url": "/todos/read"}
+    create_todo(todo, session)
+    return {"url": "/todos/read"}
 
 
 @router.get("/edit/{id}", response_class=HTMLResponse)
@@ -51,24 +45,17 @@ async def edit_todo(request: Request, id: int = Path(...),
                                                "todo": todo_to_update})
 
 
-@router.post("/edit/{id}")
+@router.put("/edit/{id}")
 async def edit_todo(todo: RawTodo, id: int = Path(...),
                     session: Session = Depends(get_session)):
-    todo_to_update = get_todo_by_id_and_user_id(id, 1, session)
-
-    todo_to_update.title = todo.title
-    todo_to_update.description = todo.description
-    todo_to_update.priority = todo.priority
-    session.commit()
+    update_todo(id, todo, session)
     return {"url": "/todos/read"}
 
 
-@router.post("/delete/{id}")
+@router.delete("/delete/{id}")
 async def delete_todo(id: int = Path(...),
                        session: Session = Depends(get_session)):
-    todo_to_delete = get_todo_by_id_and_user_id(id, 1, session)
-    session.delete(todo_to_delete)
-    session.commit()
+    delete_todo_from_db(id, 1, session)
     return {"url": "/todos/read"}
 
 
