@@ -70,12 +70,12 @@ function delete_todo() {
     send_http_request(method, url);
 }
 
-function set_todo_complete(todo_id) {
+function change_todo_complete_status(todo_id, status) {
     var method = "PUT";
     var url = "/todos/complete"+"/"+todo_id;
 
     var todo_status = {
-        "completed": true
+        "completed": status
     };
     send_http_request(method, url, todo_status);
 }

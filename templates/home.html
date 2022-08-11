@@ -20,34 +20,38 @@
                 </thead>
                 <tbody>
                 {% for todo in todos %}
-                <tr   {% if todo.complete == true %}
-                      class="table-secondary"
-                      {% else %}
-                      class="table-default"
-                      {% endif %}
-                >
-
-                  <td>{{loop.index}}</td>
-                  <td>{{todo.title}}</td>
-                  <td>
-                      <button type="button"
-                              {% if todo.complete == true %}
-                              disabled class="btn btn-secondary"
-                              {% else %}
-                              class="btn btn-success"
-                              onclick="set_todo_complete({{todo.id}})"
-                              {% endif %}
-                      >Complete</button>
-                      <button type="button"
-                              {% if todo.complete == true %}
-                              disabled class="btn btn-secondary"
-                              {% else %}
-                              class="btn btn-info"
-                              onclick="window.location.href='edit/{{todo.id}}'"
-                              {% endif %}
-                      >Edit</button>
-                  </td>
-                </tr>
+                    {% if todo.complete == true %}
+                        <tr class="table-secondary">
+                            <td>{{loop.index}}</td>
+                            <td>{{todo.title}}</td>
+                            <td>
+                                <button type="button" class="btn btn-success"
+                                onclick="change_todo_complete_status({{todo.id}}, false)"
+                                >Undo</button>
+                                <button type="button" disabled class="btn btn-secondary"
+                                >Edit</button>
+                                <button type="button" class="btn btn-danger"
+                                        onclick="delete_todo({{todo.id}})"
+                                >X</button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr class="table-default">
+                            <td>{{loop.index}}</td>
+                            <td>{{todo.title}}</td>
+                            <td>
+                                <button type="button" class="btn btn-success"
+                                onclick="change_todo_complete_status({{todo.id}}, true)"
+                                >Complete</button>
+                                <button type="button" class="btn btn-info"
+                                      onclick="window.location.href='edit/{{todo.id}}'"
+                                >Edit</button>
+                                <button type="button" class="btn btn-danger"
+                                        onclick="delete_todo({{todo.id}})"
+                                >X</button>
+                            </td>
+                        </tr>
+                    {% endif %}
                 {% endfor %}
                 </tbody>
             </table>

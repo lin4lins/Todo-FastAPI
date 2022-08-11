@@ -1,7 +1,7 @@
 from Authorization.token_manager import get_current_user
 from Database.db_manager import (create_todo, remove_todo,
                                  get_all_todos, get_todo_by_id_and_user_id,
-                                 set_todo_complete, update_todo)
+                                 update_todo, update_todo_status)
 from Database.db_properties import get_session
 from fastapi import APIRouter, Depends, Request
 from fastapi.params import Path
@@ -66,12 +66,12 @@ async def delete_todo(id: int = Path(...), user: CurrentUser = Depends(get_curre
 
 
 @router.put("/complete/{id}", response_class=HTMLResponse)
-async def complete_todo(diction: dict, id: int = Path(...),
+async def update_todo_completion_status(diction: dict, id: int = Path(...),
                         user: CurrentUser = Depends(get_current_user),
                         session: Session = Depends(get_session)):
     todo_status = diction["completed"]
-    if todo_status:
-        set_todo_complete(id, user.id, session)
+    if todo_status is not None:
+        update_todo_status(id, user.id, todo_status, session)
 
     return JSONResponse({"url": "/todos/read"})
 

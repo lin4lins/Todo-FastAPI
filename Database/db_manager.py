@@ -43,9 +43,10 @@ def update_todo(todo_id: int, user_id: int, todo: RawTodo, session: Session):
     session.commit()
 
 
-def set_todo_complete(todo_id: int, user_id: int, session: Session) -> None:
+def update_todo_status(todo_id: int, user_id: int, status: bool, session: Session) -> None:
+    print(status)
     todo_to_update = get_todo_by_id_and_user_id(todo_id, user_id, session)
-    todo_to_update.complete = True
+    todo_to_update.complete = status
     session.commit()
 
 
