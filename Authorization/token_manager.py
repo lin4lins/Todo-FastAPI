@@ -8,11 +8,9 @@ from Authorization.autentification import get_authenticated_user
 from Database.db_init import DatabaseUser
 from Exceptions import get_token_expired_exception, get_user_exception, \
     get_token_exception
-from fastapi import Depends
+from fastapi import Request, Cookie
 from jose import JWTError, jwt
 from Models.User import CurrentUser
-
-from Authorization.password_crypt import oauth2_bearer
 
 
 def get_token(user: DatabaseUser, expires_delta: timedelta) -> str:
@@ -35,10 +33,10 @@ def create_access_token(username: str, user_id: int,
     return jwt.encode(encode, key=key, algorithm=algorithm)
 
 
-async def get_current_user(token: str = Depends(oauth2_bearer))\
-                                    -> Union[CurrentUser, None]:
+async def get_current_user(request: Request, access_token: Optional[str] = Cookie(None))\
+        -> Union[CurrentUser, None]:
     try:
-        payload = jwt.decode(token, key=os.environ.get("SECRET_KEY"),
+        payload = jwt.decode(access_token, key=os.environ.get("SECRET_KEY"),
                              algorithms=[os.environ.get("ALGORITHM")])
         user_id: int = int(payload.get("sub"))
         username: str = payload.get("username")

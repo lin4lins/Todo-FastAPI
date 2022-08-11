@@ -1,9 +1,4 @@
-import os
-
-from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
-
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl=os.environ.get("TOKEN_URL"))
 
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
