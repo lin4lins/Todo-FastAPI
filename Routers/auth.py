@@ -1,14 +1,10 @@
-from datetime import timedelta
-
-from Authorization.autentification import get_authenticated_user
 from Authorization.password_crypt import get_password_hash
-from Authorization.token_manager import get_token
+from Authorization.token_manager import authorize_user
 from Database.db_init import DatabaseUser
 from Database.db_properties import get_session
-from Exceptions import get_token_exception
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi.responses import HTMLResponse, JSONResponse
+from Models.LoginJSON import LoginJSON
 from Models.User import RawUser
 from sqlalchemy.orm import Session
 
@@ -28,6 +24,25 @@ async def regpage(request: Request):
     return templates.TemplateResponse(name="register.html", context={"request": request})
 
 
+@router.post("/")
+async def login(request: Request,
+                session: Session = Depends(get_session)):
+    try:
+        json = LoginJSON(request)
+        await json.get_auth_data()
+        token = await authorize_user(json.username, json.password, session)
+
+        response = JSONResponse(content={"url": "/todos/read"})
+        response.set_cookie(key="access_token", value=token, httponly=True)
+        return response
+
+    except HTTPException:
+        msg = "Unknown error"
+        return templates.TemplateResponse("login.html",
+                                          context={"request": request, "msg": msg})
+
+
+# -----------
 @router.post("/signin", status_code=201)
 async def create_user(user: RawUser, session: Session = Depends(get_session)) -> dict:
     hashed_password = get_password_hash(user.password)
@@ -38,18 +53,3 @@ async def create_user(user: RawUser, session: Session = Depends(get_session)) ->
     session.flush()
     session.commit()
     return {"Message": "User has been created successfully", "id": user_to_add.id}
-
-
-@router.post("/login")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(),
-                                 session: Session = Depends(get_session)) -> dict:
-    username = form_data.username
-    pure_unconfirmed_password = form_data.password
-
-    authenticated_user = get_authenticated_user(username, pure_unconfirmed_password,
-                                                session)
-    if not authenticated_user:
-        raise get_token_exception()
-
-    return {"Message": "User has been logged in successfully",
-            "token": get_token(authenticated_user, expires_delta=timedelta(minutes=20))}
