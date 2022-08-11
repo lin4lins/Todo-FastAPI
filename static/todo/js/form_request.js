@@ -80,3 +80,14 @@ function set_todo_complete(todo_id) {
     };
     send_http_request(method, url, todo_status);
 }
+
+function login() {
+    var method = "POST";
+    var url = "/";
+    var login_data = {
+    "username": document.getElementById("username").value,
+    "password": document.getElementById("password").value
+    };
+
+    send_http_request(method, url, login_data);
+}
