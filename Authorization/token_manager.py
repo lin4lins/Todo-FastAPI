@@ -2,8 +2,12 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional, Union
 
+from sqlalchemy.orm import Session
+
+from Authorization.autentification import get_authenticated_user
 from Database.db_init import DatabaseUser
-from Exceptions import get_token_expired_exception, get_user_exception
+from Exceptions import get_token_expired_exception, get_user_exception, \
+    get_token_exception
 from fastapi import Depends
 from jose import JWTError, jwt
 from Models.User import CurrentUser
@@ -47,3 +51,11 @@ async def get_current_user(token: str = Depends(oauth2_bearer))\
         raise get_token_expired_exception()
     except JWTError:
         raise get_user_exception()
+
+
+async def authorize_user(username: str, password: str, session: Session):
+    authenticated_user = get_authenticated_user(username, password, session)
+    if not authenticated_user:
+        raise get_token_exception()
+
+    return get_token(authenticated_user, expires_delta=timedelta(minutes=60))
