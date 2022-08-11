@@ -31,9 +31,11 @@
                         <option {% if todo.priority == 5 %} selected="selected" {% endif %}
                         >5</option>
                     </select>
-                </div>
-                <button onclick="edit_todo()" type="button" class="btn btn-primary">Edit todo</button>
-                <button onclick="delete_todo()" type="button" class="btn btn-danger">Delete todo</button>
+                </div<button onclick="edit_todo()" type="button" class="btn btn-primary">
+                    Edit</button>
+                <button type="button" class="btn btn-light"
+                        onclick="window.location.replace('/todos/read')">
+                    Cancel</button>
             </form>
         </div>
     </div>
