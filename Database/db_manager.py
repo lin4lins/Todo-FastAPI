@@ -7,17 +7,8 @@ from sqlalchemy.orm import Session
 from Database.db_init import DatabaseTodo, DatabaseUser
 
 
-# TODOS
-def is_db_empty(session: Session) -> bool:
-    records = get_all_todos(session)
-    if len(records) == 0:
-        return True
-
-    return False
-
-
-def get_all_todos(session: Session) -> Union[list[DatabaseTodo], None]:
-    todos = session.query(DatabaseTodo).all()
+def get_all_todos(user_id: int, session: Session) -> Union[list[DatabaseTodo], None]:
+    todos = session.query(DatabaseTodo).filter(DatabaseTodo.owner_id == user_id).all()
     return todos
 
 
@@ -34,33 +25,33 @@ def get_all_user_todos_by_user_id(user_id: int, session: Session) -> list:
     return todos
 
 
+def create_todo(user_id: int, todo: RawTodo, session: Session):
+    todo_to_create = DatabaseTodo(title=todo.title, description=todo.description,
+                                  priority=todo.priority, complete=todo.complete,
+                                  owner_id=user_id)
+    session.add(todo_to_create)
+    session.flush()
+    session.commit()
+
+
+def update_todo(todo_id: int, user_id: int, todo: RawTodo, session: Session):
+    todo_to_update = get_todo_by_id_and_user_id(todo_id, user_id, session)
+
+    todo_to_update.title = todo.title
+    todo_to_update.description = todo.description
+    todo_to_update.priority = todo.priority
+    session.commit()
+
+
 def set_todo_complete(todo_id: int, user_id: int, session: Session) -> None:
     todo_to_update = get_todo_by_id_and_user_id(todo_id, user_id, session)
     todo_to_update.complete = True
     session.commit()
 
 
-def delete_todo_from_db(todo_id: int, user_id: int, session: Session):
+def remove_todo(todo_id: int, user_id: int, session: Session):
     todo_to_delete = get_todo_by_id_and_user_id(todo_id, user_id, session)
     session.delete(todo_to_delete)
-    session.commit()
-
-
-def create_todo(todo: RawTodo, session: Session):
-    todo_to_create = DatabaseTodo(title=todo.title, description=todo.description,
-                                  priority=todo.priority, complete=todo.complete,
-                                  owner_id=1)
-    session.add(todo_to_create)
-    session.flush()
-    session.commit()
-
-
-def update_todo(id: int, todo: RawTodo, session: Session):
-    todo_to_update = get_todo_by_id_and_user_id(id, 1, session)
-
-    todo_to_update.title = todo.title
-    todo_to_update.description = todo.description
-    todo_to_update.priority = todo.priority
     session.commit()
 
 

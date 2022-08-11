@@ -1,4 +1,5 @@
-from Database.db_manager import (create_todo, delete_todo_from_db,
+from Authorization.token_manager import get_current_user
+from Database.db_manager import (create_todo, remove_todo,
                                  get_all_todos, get_todo_by_id_and_user_id,
                                  set_todo_complete, update_todo)
 from Database.db_properties import get_session
@@ -10,6 +11,8 @@ from Models.Todo import RawTodo
 from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
+from Models.User import CurrentUser
+
 router = APIRouter(prefix="/todos", tags=["todo"],
                    responses={404: {"description": "Not found"}})
 
@@ -17,8 +20,9 @@ templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/read", response_class=HTMLResponse)
-async def read_todos(request: Request, session: Session = Depends(get_session)):
-    todos = get_all_todos(session)
+async def read_todos(request: Request, user: CurrentUser = Depends(get_current_user),
+                     session: Session = Depends(get_session)):
+    todos = get_all_todos(user.id, session)
     return templates.TemplateResponse(name="home.html",
                                       context={"request": request, "todos": todos})
 
@@ -29,16 +33,17 @@ async def add_todo(request: Request):
 
 
 @router.post("/add")
-async def add_todo(todo: RawTodo,
+async def add_todo(todo: RawTodo, user: CurrentUser = Depends(get_current_user),
                        session: Session = Depends(get_session)):
-    create_todo(todo, session)
+    create_todo(user.id, todo, session)
     return JSONResponse(content={"url": "/todos/read"})
 
 
 @router.get("/edit/{id}", response_class=HTMLResponse)
 async def edit_todo(request: Request, id: int = Path(...),
+                    user: CurrentUser = Depends(get_current_user),
                     session: Session = Depends(get_session)):
-    todo_to_update = get_todo_by_id_and_user_id(id, 1, session)
+    todo_to_update = get_todo_by_id_and_user_id(id, user.id, session)
 
     return templates.TemplateResponse(name="edit-todo.html",
                                       context={"request": request,
@@ -47,24 +52,26 @@ async def edit_todo(request: Request, id: int = Path(...),
 
 @router.put("/edit/{id}")
 async def edit_todo(todo: RawTodo, id: int = Path(...),
+                    user: CurrentUser = Depends(get_current_user),
                     session: Session = Depends(get_session)):
-    update_todo(id, todo, session)
+    update_todo(id, user.id, todo, session)
     return JSONResponse(content={"url": "/todos/read"})
 
 
 @router.delete("/delete/{id}")
-async def delete_todo(id: int = Path(...),
+async def delete_todo(id: int = Path(...), user: CurrentUser = Depends(get_current_user),
                        session: Session = Depends(get_session)):
-    delete_todo_from_db(id, 1, session)
+    remove_todo(id, user.id, session)
     return JSONResponse(content={"url": "/todos/read"})
 
 
 @router.put("/complete/{id}", response_class=HTMLResponse)
 async def complete_todo(diction: dict, id: int = Path(...),
+                        user: CurrentUser = Depends(get_current_user),
                         session: Session = Depends(get_session)):
     todo_status = diction["completed"]
     if todo_status:
-        set_todo_complete(id, 1, session)
+        set_todo_complete(id, user.id, session)
 
     return JSONResponse({"url": "/todos/read"})
 
