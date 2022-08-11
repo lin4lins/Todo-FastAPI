@@ -63,10 +63,9 @@ function edit_todo() {
     send_http_request(method, url, todo_updated_data);
 }
 
-function delete_todo() {
+function delete_todo(todo_id) {
     var method = "DELETE";
-    var todo_id_str = get_todo_id_str_from_url();
-    var url = "/todos/delete"+"/"+todo_id_str;
+    var url = "/todos/delete"+"/"+todo_id.toString();
     send_http_request(method, url);
 }
 
