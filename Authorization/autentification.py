@@ -10,14 +10,12 @@ from Authorization.password_crypt import verify_password
 
 def get_authenticated_user(username: str, password: str, session: Session) \
                                             -> Union[DatabaseUser, None]:
-    database_user = get_user_by_username(username, session)
-    if not database_user:
+    user = get_user_by_username(username, session)
+    if not user:
         raise get_user_not_found_exception()
-        
-    if authenticate_user(database_user, password):
-        return database_user
 
-    return
+    if authenticate_user(user, password):
+        return user
 
 
 def authenticate_user(user: DatabaseUser, password_to_check: str) -> bool:
