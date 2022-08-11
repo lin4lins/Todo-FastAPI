@@ -32,7 +32,7 @@ async def add_todo(request: Request):
 async def add_todo(todo: RawTodo,
                        session: Session = Depends(get_session)):
     create_todo(todo, session)
-    return {"url": "/todos/read"}
+    return JSONResponse(content={"url": "/todos/read"})
 
 
 @router.get("/edit/{id}", response_class=HTMLResponse)
@@ -49,14 +49,14 @@ async def edit_todo(request: Request, id: int = Path(...),
 async def edit_todo(todo: RawTodo, id: int = Path(...),
                     session: Session = Depends(get_session)):
     update_todo(id, todo, session)
-    return {"url": "/todos/read"}
+    return JSONResponse(content={"url": "/todos/read"})
 
 
 @router.delete("/delete/{id}")
 async def delete_todo(id: int = Path(...),
                        session: Session = Depends(get_session)):
     delete_todo_from_db(id, 1, session)
-    return {"url": "/todos/read"}
+    return JSONResponse(content={"url": "/todos/read"})
 
 
 @router.put("/complete/{id}", response_class=HTMLResponse)
