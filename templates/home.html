@@ -20,14 +20,32 @@
                 </thead>
                 <tbody>
                 {% for todo in todos %}
-                <tr class="pointer" >
+                <tr   {% if todo.complete == true %}
+                      class="table-secondary"
+                      {% else %}
+                      class="table-default"
+                      {% endif %}
+                >
 
                   <td>{{loop.index}}</td>
                   <td>{{todo.title}}</td>
                   <td>
-                      <button type="button" class="btn btn-success">Complete</button>
-                      <button onclick="window.location.href='edit/{{todo.id}}'"
-                              type="button" class="btn btn-info">Edit</button>
+                      <button type="button"
+                              {% if todo.complete == true %}
+                              disabled class="btn btn-secondary"
+                              {% else %}
+                              class="btn btn-success"
+                              onclick="set_todo_complete({{todo.id}})"
+                              {% endif %}
+                      >Complete</button>
+                      <button type="button"
+                              {% if todo.complete == true %}
+                              disabled class="btn btn-secondary"
+                              {% else %}
+                              class="btn btn-info"
+                              onclick="window.location.href='edit/{{todo.id}}'"
+                              {% endif %}
+                      >Edit</button>
                   </td>
                 </tr>
                 {% endfor %}
