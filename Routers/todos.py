@@ -75,13 +75,19 @@ async def edit_todo(request: Request, id: int = Path(...),
 
     return templates.TemplateResponse(name=page, context=context)
 
-@router.put("/edit/{id}")
-async def edit_todo(todo: RawTodo, id: int = Path(...),
-                    user: CurrentUser = Depends(get_current_user),
-                    session: Session = Depends(get_session)):
-    update_todo(id, user.id, todo, session)
-    return JSONResponse(content={"url": "/todos/read"})
 
+@router.put("/edit/{id}", response_class=JSONResponse)
+async def edit_todo(request: Request, todo: RawTodo, id: int = Path(...),
+                    session: Session = Depends(get_session)):
+    try:
+        user = await get_current_user(request)
+        update_todo(id, user.id, todo, session)
+        content = {"url": "/todos/read"}
+
+    except RootException as exp:
+        content = {'error': exp.detail}
+
+    return JSONResponse(content=content)
 
 @router.delete("/delete/{id}")
 async def delete_todo(id: int = Path(...), user: CurrentUser = Depends(get_current_user),
