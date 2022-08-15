@@ -1,9 +1,12 @@
 from Authorization.password_crypt import get_password_hash
-from Authorization.token_manager import authorize_user
+from Authorization.token_manager import authorize_user, get_current_user
 from Database.db_init import DatabaseUser
+from Database.db_manager import update_user_status
 from Database.db_properties import get_session
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
+
+from Exceptions import RootException
 from Models.LoginJSON import LoginJSON
 from Models.User import RawUser
 from sqlalchemy.orm import Session
@@ -32,9 +35,36 @@ async def login(request: Request,
         await json.get_auth_data()
         token = await authorize_user(json.username, json.password, session)
 
-        response = JSONResponse(content={"url": "/todos/read"})
+        if not token:
+            msg = "User not found. Incorrect login or password. " \
+                  "Check whether you are registered."
+            return templates.TemplateResponse("login.html",
+                                              context={"request": request, "msg": msg})
+
+        content = {"url": "/todos/read"}
+        response = JSONResponse(content=content)
         response.set_cookie(key="access_token", value=token, httponly=True)
-        return response
+
+    except RootException as exp:
+        response = JSONResponse(content=exp.detail)
+
+    return response
+
+
+@router.post("/logout")
+async def logout(request: Request, session: Session = Depends(get_session)):
+    try:
+        user = await get_current_user(request)
+        update_user_status(user, False, session)
+
+        content = {"url": "/"}
+        response = JSONResponse(content=content)
+        response.delete_cookie("access_token")
+
+    except RootException as exp:
+        response = JSONResponse(content=exp.detail)
+
+    return response
 
     except HTTPException:
         msg = "Unknown error"
