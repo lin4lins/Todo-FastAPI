@@ -89,12 +89,19 @@ async def edit_todo(request: Request, todo: RawTodo, id: int = Path(...),
 
     return JSONResponse(content=content)
 
-@router.delete("/delete/{id}")
-async def delete_todo(id: int = Path(...), user: CurrentUser = Depends(get_current_user),
-                       session: Session = Depends(get_session)):
-    remove_todo(id, user.id, session)
-    return JSONResponse(content={"url": "/todos/read"})
 
+@router.delete("/delete/{id}", response_class=JSONResponse)
+async def delete_todo(request: Request, id: int = Path(...),
+                       session: Session = Depends(get_session)):
+    try:
+        user = await get_current_user(request)
+        remove_todo(id, user.id, session)
+        content = {"url": "/todos/read"}
+
+    except RootException as exp:
+        content = {'error': exp.detail}
+
+    return JSONResponse(content=content)
 
 @router.put("/complete/{id}", response_class=HTMLResponse)
 async def update_todo_completion_status(diction: dict, id: int = Path(...),
