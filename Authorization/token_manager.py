@@ -21,16 +21,17 @@ def get_token(user: DatabaseUser, expires_delta: timedelta) -> str:
 
 
 def create_access_token(username: str, user_id: int,
-                        key, algorithm,
+                        key: str, algorithm: str,
                         expires_delta: Optional[timedelta] = None) -> str:
     encode = {"sub": str(user_id), "username": username}
     if expires_delta:
-        expires = datetime.now() + expires_delta
+        expires = datetime.timestamp(datetime.now() + expires_delta)
     else:
-        expires = datetime.now() + timedelta(minutes=20)
+        expires = datetime.timestamp(datetime.now() + timedelta(minutes=20))
 
     encode.update({"exp": expires})
-    return jwt.encode(encode, key=key, algorithm=algorithm)
+    token = jwt.encode(encode, key=key, algorithm=algorithm)
+    return token
 
 
 async def get_current_user(request: Request, access_token: Optional[str] = Cookie(None))\
