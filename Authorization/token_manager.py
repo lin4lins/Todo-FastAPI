@@ -34,9 +34,9 @@ def create_access_token(username: str, user_id: int,
     return token
 
 
-async def get_current_user(request: Request, access_token: Optional[str] = Cookie(None))\
-        -> Union[CurrentUser, None]:
+async def get_current_user(request: Request) -> CurrentUser:
     try:
+        access_token = request.cookies.get("access_token")
         payload = jwt.decode(access_token, key=os.environ.get("SECRET_KEY"),
                              algorithms=[os.environ.get("ALGORITHM")])
         user_id: int = int(payload.get("sub"))
