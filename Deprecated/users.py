@@ -6,7 +6,6 @@ from Database.db_init import DatabaseUser
 from Database.db_manager import (delete_user, get_all_users, get_user_by_id,
                                  update_user_password)
 from Database.db_properties import get_session
-from Exceptions import get_user_exception, get_user_not_found_exception
 from fastapi import APIRouter, Depends
 from fastapi.params import Form, Path, Query
 from Models.User import CurrentUser
