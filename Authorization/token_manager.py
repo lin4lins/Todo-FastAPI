@@ -1,15 +1,18 @@
 import os
 from datetime import datetime, timedelta
-from typing import Optional, Union
+from typing import Optional
 
+from jwt import ExpiredSignatureError
 from sqlalchemy.orm import Session
 
 from Authorization.autentification import get_authenticated_user
 from Database.db_init import DatabaseUser
-from Exceptions import get_token_expired_exception, get_user_exception, \
-    get_token_exception
-from fastapi import Request, Cookie
+from fastapi import Request
 from jose import JWTError, jwt
+
+from Database.db_manager import update_user_status
+from Exceptions import RootException
+from Exceptions.TokenExceptions import InvalidTokenException
 from Models.User import CurrentUser
 
 
