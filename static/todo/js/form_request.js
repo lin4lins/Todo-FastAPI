@@ -18,8 +18,9 @@ function send_http_request(method, url, data = null) {
         }
         else {
             alert("Error is occurred. Reload page and try again");
-        };
-      }};
+        }
+      }
+    }
 
       if (data == null) {
         xhr.send();
@@ -77,15 +78,4 @@ function change_todo_complete_status(todo_id, status) {
         "completed": status
     };
     send_http_request(method, url, todo_status);
-}
-
-function login() {
-    var method = "POST";
-    var url = "/";
-    var login_data = {
-    "username": document.getElementById("username").value,
-    "password": document.getElementById("password").value
-    };
-
-    send_http_request(method, url, login_data);
 }
