@@ -1,3 +1,5 @@
+from typing import Union
+
 from Exceptions.DBExceptions import UserTodosNotFoundException, UserTodoNotFound
 from Exceptions.UserExceptions import UsersNotFoundException, UserNotFoundException
 from Models.Todo import RawTodo
@@ -95,5 +97,15 @@ def delete_user(user: CurrentUser, session: Session) -> None:
         filter(DatabaseUser.username == user.username
                and DatabaseUser.id == user.id).first()
     session.delete(user_to_delete)
+    session.commit()
+    return
+
+
+def update_user_status(user: Union[DatabaseUser, CurrentUser],
+                       is_active: bool, session: Session) -> None:
+    user = session.query(DatabaseUser). \
+        filter(DatabaseUser.username == user.username
+               and DatabaseUser.id == user.id).first()
+    user.is_active = is_active
     session.commit()
     return
