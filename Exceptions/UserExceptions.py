@@ -1,12 +1,14 @@
-class UsersNotFoundException(Exception):
+from Exceptions import RootException
+
+
+class UsersNotFoundException(RootException):
     """ Raises if there are not any users in database"""
 
     def __init__(self):
         self.detail = "Users in database not found"
-        super().__init__(self.detail)
 
 
-class UserNotFoundException(Exception):
+class UserNotFoundException(RootException):
     """ Raises if user with some id or username is not found in database"""
 
     def __init__(self, user_id=None, username=None):
@@ -18,7 +20,3 @@ class UserNotFoundException(Exception):
 
         if not user_id and not username:
             self.detail = f"User not found"
-
-        super().__init__(self.detail)
-
-
