@@ -62,14 +62,18 @@ async def add_todo(request: Request, todo: RawTodo,
 
 @router.get("/edit/{id}", response_class=HTMLResponse)
 async def edit_todo(request: Request, id: int = Path(...),
-                    user: CurrentUser = Depends(get_current_user),
                     session: Session = Depends(get_session)):
-    todo_to_update = get_todo_by_id_and_user_id(id, user.id, session)
+    try:
+        user = await get_current_user(request)
+        todo_to_update = get_todo_by_id_and_user_id(id, user.id, session)
+        page = "edit-todo.html"
+        context = {"request": request, "todo": todo_to_update}
 
-    return templates.TemplateResponse(name="edit-todo.html",
-                                      context={"request": request,
-                                               "todo": todo_to_update})
+    except RootException as exp:
+        page = "error.html"
+        context = {"request": request, 'error': exp.detail}
 
+    return templates.TemplateResponse(name=page, context=context)
 
 @router.put("/edit/{id}")
 async def edit_todo(todo: RawTodo, id: int = Path(...),
