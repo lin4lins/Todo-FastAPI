@@ -56,8 +56,10 @@ async def get_current_user(request: Request) -> CurrentUser:
 
 
 async def authorize_user(username: str, password: str, session: Session):
-    authenticated_user = get_authenticated_user(username, password, session)
-    if not authenticated_user:
-        raise get_token_exception()
+    try:
+        authenticated_user = get_authenticated_user(username, password, session)
+        update_user_status(authenticated_user, True, session)
+        return get_token(authenticated_user, expires_delta=timedelta(minutes=15))
 
-    return get_token(authenticated_user, expires_delta=timedelta(minutes=60))
+    except RootException as exp:
+        return exp.get_detail()
