@@ -103,15 +103,26 @@ async def delete_todo(request: Request, id: int = Path(...),
 
     return JSONResponse(content=content)
 
-@router.put("/complete/{id}", response_class=HTMLResponse)
-async def update_todo_completion_status(diction: dict, id: int = Path(...),
-                        user: CurrentUser = Depends(get_current_user),
-                        session: Session = Depends(get_session)):
-    todo_status = diction["completed"]
-    if todo_status is not None:
-        update_todo_status(id, user.id, todo_status, session)
 
-    return JSONResponse({"url": "/todos/read"})
+@router.put("/complete/{id}", response_class=JSONResponse)
+async def update_todo_completion_status(request: Request,
+                                        status: dict, id: int = Path(...),
+                                        session: Session = Depends(get_session)):
+    try:
+        user = await get_current_user(request)
+        todo_status = status.get("completed")
+        if todo_status is not None:
+            update_todo_status(id, user.id, todo_status, session)
+
+        content = {"url": "/todos/read"}
+
+    except KeyError:
+        content = {'error': "Unknown status"}
+
+    except RootException as exp:
+        content = {'error': exp.detail}
+
+    return JSONResponse(content=content)
 
 
 
