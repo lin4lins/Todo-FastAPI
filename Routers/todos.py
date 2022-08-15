@@ -1,3 +1,5 @@
+from starlette.responses import JSONResponse
+
 from Authorization.token_manager import get_current_user
 from Database.db_manager import (create_todo, remove_todo,
                                  get_todo_by_id_and_user_id,
@@ -13,9 +15,7 @@ from Exceptions import RootException
 from Exceptions.TokenExceptions import InvalidTokenException
 from Models.Todo import RawTodo
 from sqlalchemy.orm import Session
-from starlette.responses import JSONResponse
 
-from Models.User import CurrentUser
 
 router = APIRouter(prefix="/todos", tags=["todo"],
                    responses={404: {"description": "Not found"}})
@@ -46,11 +46,18 @@ async def add_todo(request: Request):
     return templates.TemplateResponse(name="add-todo.html", context={"request": request})
 
 
-@router.post("/add")
-async def add_todo(todo: RawTodo, user: CurrentUser = Depends(get_current_user),
-                       session: Session = Depends(get_session)):
-    create_todo(user.id, todo, session)
-    return JSONResponse(content={"url": "/todos/read"})
+@router.post("/add", response_class=JSONResponse)
+async def add_todo(request: Request, todo: RawTodo,
+                   session: Session = Depends(get_session)):
+    try:
+        user = await get_current_user(request)
+        create_todo(user.id, todo, session)
+        content = {"url": "/todos/read"}
+
+    except RootException as exp:
+        content = {"error": exp.detail}
+
+    return JSONResponse(content=content)
 
 
 @router.get("/edit/{id}", response_class=HTMLResponse)
