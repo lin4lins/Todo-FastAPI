@@ -8,7 +8,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="#">Home </a>
+                    {% if is_authorized %}
+                    <button class="btn btn-dark" onclick="logout()">Logout</button>
+                    {% else %}
+                    <form action="/">
+                        <button class="btn btn-dark">Login</button>
+                    </form>
+                    {% endif %}
                 </li>
             </ul>
         </div>
