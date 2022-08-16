@@ -45,14 +45,12 @@ async def get_current_user(request: Request) -> CurrentUser:
         user_id: int = int(payload.get("sub"))
         username: str = payload.get("username")
         if user_id is None or username is None:
-            raise get_user_exception()
+            raise JWTError()
 
         return CurrentUser(id=user_id, username=username)
 
-    except jwt.ExpiredSignatureError:
-        raise get_token_expired_exception()
-    except JWTError:
-        raise get_user_exception()
+    except (AttributeError, ExpiredSignatureError, JWTError):
+        raise TokenException()
 
 
 async def authorize_user(username: str, password: str, session: Session):
