@@ -10,8 +10,8 @@ from Database.db_init import DatabaseUser
 from fastapi import Request
 from jose import JWTError, jwt
 
-from Database.db_manager import update_user_status
-from Exceptions.TokenExceptions import TokenException
+from Database.db_manager import update_user_status, get_user_status
+from Exceptions.TokenExceptions import TokenException, TokenNotFoundException
 from Models.User import CurrentUser
 
 
@@ -38,7 +38,7 @@ def create_access_token(username: str, user_id: int,
 
 async def get_current_user(request: Request) -> CurrentUser:
     try:
-        access_token = request.cookies.get("access_token")
+        access_token = await get_access_token_from_request(request)
         payload = jwt.decode(access_token, key=os.environ.get("SECRET_KEY"),
                              algorithms=[os.environ.get("ALGORITHM")])
         user_id: int = int(payload.get("sub"))
@@ -56,3 +56,27 @@ async def authorize_user(username: str, password: str, session: Session):
     authenticated_user = get_authenticated_user(username, password, session)
     update_user_status(authenticated_user, True, session)
     return get_token(authenticated_user, expires_delta=timedelta(minutes=15))
+
+
+async def is_user_active(request: Request, session) -> bool:
+    user: CurrentUser = await get_current_user(request)
+    is_active = get_user_status(user, session)
+    return is_active
+
+
+async def get_active_current_user_from_request(request: Request, session) -> CurrentUser:
+    user: CurrentUser = await get_current_user(request)
+    is_active = get_user_status(user, session)
+    if not is_active:
+        raise TokenException()
+
+    return user
+
+
+async def get_access_token_from_request(request: Request) -> str:
+    cookie = request.cookies
+    access_token = cookie.get('access_token')
+    if not access_token:
+        raise TokenNotFoundException()
+
+    return access_token
