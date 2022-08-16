@@ -1,6 +1,6 @@
 from typing import Union
 
-from Exceptions.DBExceptions import UserTodosNotFoundException, UserTodoNotFound
+from Exceptions.DBExceptions import UserTodoNotFound
 from Exceptions.UserExceptions import UsersNotFoundException, UserNotFoundException
 from Models.Todo import RawTodo
 from Models.User import CurrentUser
@@ -11,9 +11,6 @@ from Database.db_init import DatabaseTodo, DatabaseUser
 
 def get_all_user_todos_by_user_id(user_id: int, session: Session) -> list:
     todos = session.query(DatabaseTodo).filter(DatabaseTodo.owner_id == user_id).all()
-    if not todos:
-        raise UserTodosNotFoundException(user_id)
-
     return todos
 
 
