@@ -3,7 +3,7 @@ from Authorization.token_manager import authorize_user, get_current_user
 from Database.db_init import DatabaseUser
 from Database.db_manager import update_user_status
 from Database.db_properties import get_session
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from Exceptions import RootException

@@ -40,7 +40,16 @@ async def read_todos(request: Request, session: Session = Depends(get_session)):
 
 @router.get("/add", response_class=HTMLResponse)
 async def add_todo(request: Request):
-    return templates.TemplateResponse(name="add-todo.html", context={"request": request})
+    try:
+        user = await get_current_user(request)
+        page = "add-todo.html"
+        context = {"request": request, "is_authorized": True}
+
+    except TokenException as exp:
+        page = "error.html"
+        context = {"request": request, 'error': exp.get_detail()}
+
+    return templates.TemplateResponse(name=page, context=context)
 
 
 @router.post("/add", response_class=JSONResponse)
