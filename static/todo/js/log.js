@@ -14,10 +14,3 @@ function logout() {
     var url = "/logout";
     send_http_request(method, url);
 }
-
-function is_user_logged_in() {
-    if (document.cookie) {
-        return true;
-    }
-    return false;
-}
