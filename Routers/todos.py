@@ -11,8 +11,8 @@ from fastapi.params import Path
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from Exceptions import RootException
-from Exceptions.TokenExceptions import InvalidTokenException
+from Exceptions.DBExceptions import UserTodoNotFound
+from Exceptions.TokenExceptions import TokenException
 from Models.Todo import RawTodo
 from sqlalchemy.orm import Session
 
@@ -31,13 +31,10 @@ async def read_todos(request: Request, session: Session = Depends(get_session)):
         page = "home.html"
         context = {"request": request, "todos": todos, 'user': True}
 
-    except InvalidTokenException:
+    except TokenException:
         page = "error.html"
         context = {"request": request, 'error': 'You are unauthorized'}
 
-    except Exception:
-        page = "error.html"
-        context = {"request": request, 'error': 'Something went wrong'}
     return templates.TemplateResponse(name=page, context=context)
 
 
@@ -54,8 +51,8 @@ async def add_todo(request: Request, todo: RawTodo,
         create_todo(user.id, todo, session)
         content = {"url": "/todos/read"}
 
-    except RootException as exp:
-        content = {"error": exp.detail}
+    except TokenException as exp:
+        content = {"error": exp.get_detail()}
 
     return JSONResponse(content=content)
 
@@ -69,9 +66,9 @@ async def edit_todo(request: Request, id: int = Path(...),
         page = "edit-todo.html"
         context = {"request": request, "todo": todo_to_update}
 
-    except RootException as exp:
+    except (TokenException, UserTodoNotFound) as exp:
         page = "error.html"
-        context = {"request": request, 'error': exp.detail}
+        context = {"request": request, 'error': exp.get_detail()}
 
     return templates.TemplateResponse(name=page, context=context)
 
@@ -84,8 +81,8 @@ async def edit_todo(request: Request, todo: RawTodo, id: int = Path(...),
         update_todo(id, user.id, todo, session)
         content = {"url": "/todos/read"}
 
-    except RootException as exp:
-        content = {'error': exp.detail}
+    except (TokenException, UserTodoNotFound) as exp:
+        content = {"error": exp.get_detail()}
 
     return JSONResponse(content=content)
 
@@ -98,8 +95,8 @@ async def delete_todo(request: Request, id: int = Path(...),
         remove_todo(id, user.id, session)
         content = {"url": "/todos/read"}
 
-    except RootException as exp:
-        content = {'error': exp.detail}
+    except (TokenException, UserTodoNotFound) as exp:
+        content = {"error": exp.get_detail()}
 
     return JSONResponse(content=content)
 
@@ -116,11 +113,8 @@ async def update_todo_completion_status(request: Request,
 
         content = {"url": "/todos/read"}
 
-    except KeyError:
-        content = {'error': "Unknown status"}
-
-    except RootException as exp:
-        content = {'error': exp.detail}
+    except (TokenException, UserTodoNotFound) as exp:
+        content = {"error": exp.get_detail()}
 
     return JSONResponse(content=content)
 
