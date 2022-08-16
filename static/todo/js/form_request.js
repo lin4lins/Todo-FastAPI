@@ -17,7 +17,7 @@ function send_http_request(method, url, data = null) {
             window.location.replace(jsonResponse.url);
         }
         else if (xhr.status == 200 && jsonResponse.error) {
-            alert(error);
+            alert(jsonResponse.error);
         }
       }
     }
