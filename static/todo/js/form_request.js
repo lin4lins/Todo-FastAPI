@@ -16,8 +16,8 @@ function send_http_request(method, url, data = null) {
         if  (xhr.status == 200 && jsonResponse.url) {
             window.location.replace(jsonResponse.url);
         }
-        else {
-            alert("Error is occurred. Reload page and try again");
+        else if (xhr.status == 200 && jsonResponse.error) {
+            alert(error);
         }
       }
     }
