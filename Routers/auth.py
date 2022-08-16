@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from Exceptions.TokenExceptions import TokenException
-from Exceptions.UserExceptions import UserNotFoundException
+from Exceptions.UserExceptions import UserNotFoundException, UserException
 from Models.LoginJSON import LoginJSON
 from Models.User import RawUser
 from sqlalchemy.orm import Session
@@ -39,8 +39,9 @@ async def login(request: Request,
         response = JSONResponse(content=content)
         response.set_cookie(key="access_token", value=token, httponly=True)
 
-    except (TokenException, UserNotFoundException) as exp:
-        response = JSONResponse(content=exp.get_detail())
+    except (TokenException, UserException) as exp:
+        content = {"error": exp.get_detail()}
+        response = JSONResponse(content=content)
 
     return response
 
