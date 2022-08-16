@@ -11,8 +11,7 @@ from fastapi import Request
 from jose import JWTError, jwt
 
 from Database.db_manager import update_user_status
-from Exceptions import RootException
-from Exceptions.TokenExceptions import InvalidTokenException
+from Exceptions.TokenExceptions import TokenException
 from Models.User import CurrentUser
 
 
@@ -54,10 +53,6 @@ async def get_current_user(request: Request) -> CurrentUser:
 
 
 async def authorize_user(username: str, password: str, session: Session):
-    try:
-        authenticated_user = get_authenticated_user(username, password, session)
-        update_user_status(authenticated_user, True, session)
-        return get_token(authenticated_user, expires_delta=timedelta(minutes=15))
-
-    except RootException as exp:
-        return exp.get_detail()
+    authenticated_user = get_authenticated_user(username, password, session)
+    update_user_status(authenticated_user, True, session)
+    return get_token(authenticated_user, expires_delta=timedelta(minutes=15))
