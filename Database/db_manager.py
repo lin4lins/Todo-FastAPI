@@ -109,3 +109,8 @@ def update_user_status(user: Union[DatabaseUser, CurrentUser],
     user_to_update.is_active = is_active
     session.commit()
     return
+
+
+def get_user_status(user: CurrentUser, session: Session):
+    user = get_user_by_id_and_username(user.id, user.username, session)
+    return user.is_active
