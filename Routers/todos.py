@@ -29,7 +29,7 @@ async def read_todos(request: Request, session: Session = Depends(get_session)):
         user = await get_current_user(request)
         todos = get_all_user_todos_by_user_id(user.id, session)
         page = "home.html"
-        context = {"request": request, "todos": todos, 'user': True}
+        context = {"request": request, "todos": todos, 'is_authorized': True}
 
     except TokenException:
         page = "error.html"
@@ -64,7 +64,7 @@ async def edit_todo(request: Request, id: int = Path(...),
         user = await get_current_user(request)
         todo_to_update = get_todo_by_id_and_user_id(id, user.id, session)
         page = "edit-todo.html"
-        context = {"request": request, "todo": todo_to_update}
+        context = {"request": request, "todo": todo_to_update, "is_authorized": True}
 
     except (TokenException, UserTodoNotFound) as exp:
         page = "error.html"
