@@ -80,29 +80,32 @@ def get_user_by_username(username: str, session: Session) -> DatabaseUser:
     return user
 
 
-def update_user_password(user: CurrentUser, password: str, session: Session) -> None:
+def get_user_by_id_and_username(id: int, username: str, session: Session) -> DatabaseUser:
     user = session.query(DatabaseUser). \
-        filter(DatabaseUser.username == user.username
-               and DatabaseUser.id == user.id).first()
-    user.hashed_password = password
+        filter(DatabaseUser.id == id and DatabaseUser.username == username).first()
+    if not user:
+        raise UserNotFoundException()
+
+    return user
+
+
+def update_user_password(user: CurrentUser, password: str, session: Session) -> None:
+    user_to_update = get_user_by_id_and_username(user.id, user.username, session)
+    user_to_update.hashed_password = password
     session.commit()
     return
 
 
 def delete_user(user: CurrentUser, session: Session) -> None:
-    user_to_delete = session.query(DatabaseUser). \
-        filter(DatabaseUser.username == user.username
-               and DatabaseUser.id == user.id).first()
-    session.delete(user_to_delete)
+    user_to_update = get_user_by_id_and_username(user.id, user.username, session)
+    session.delete(user_to_update)
     session.commit()
     return
 
 
 def update_user_status(user: Union[DatabaseUser, CurrentUser],
                        is_active: bool, session: Session) -> None:
-    user = session.query(DatabaseUser). \
-        filter(DatabaseUser.username == user.username
-               and DatabaseUser.id == user.id).first()
-    user.is_active = is_active
+    user_to_update = get_user_by_id_and_username(user.id, user.username, session)
+    user_to_update.is_active = is_active
     session.commit()
     return
