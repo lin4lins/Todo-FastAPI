@@ -23,7 +23,7 @@ def get_todo_by_id_and_user_id(todo_id: int, user_id: int, session: Session) \
         filter(DatabaseTodo.id == todo_id). \
         filter(DatabaseTodo.owner_id == user_id).first()
     if not todo:
-        raise UserTodoNotFound(user_id, todo_id)
+        raise UserTodoNotFound()
 
     return todo
 
@@ -70,7 +70,7 @@ def get_all_users(session: Session) -> list[DatabaseUser]:
 def get_user_by_id(id: int, session: Session) -> DatabaseUser:
     user = session.query(DatabaseUser).filter(DatabaseUser.id == id).first()
     if not user:
-        raise UserNotFoundException(id)
+        raise UserNotFoundException()
 
     return user
 
@@ -78,7 +78,7 @@ def get_user_by_id(id: int, session: Session) -> DatabaseUser:
 def get_user_by_username(username: str, session: Session) -> DatabaseUser:
     user = session.query(DatabaseUser).filter(DatabaseUser.username == username).first()
     if not user:
-        raise UserNotFoundException(username)
+        raise UserNotFoundException()
 
     return user
 

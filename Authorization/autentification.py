@@ -13,7 +13,7 @@ def get_authenticated_user(username: str, password: str, session: Session) \
                                             -> Union[DatabaseUser, None]:
     user = get_user_by_username(username, session)
     if not user:
-        raise UserNotFoundException(username)
+        raise UserNotFoundException()
 
     if not authenticate_user(user, password):
         raise IncorrectUsernameOrPasswordException()
