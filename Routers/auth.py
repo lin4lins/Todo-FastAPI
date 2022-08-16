@@ -6,7 +6,8 @@ from Database.db_properties import get_session
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-from Exceptions import RootException
+from Exceptions.TokenExceptions import TokenException
+from Exceptions.UserExceptions import UserNotFoundException
 from Models.LoginJSON import LoginJSON
 from Models.User import RawUser
 from sqlalchemy.orm import Session
@@ -34,19 +35,12 @@ async def login(request: Request,
         json = LoginJSON(request)
         await json.get_auth_data()
         token = await authorize_user(json.username, json.password, session)
-
-        if not token:
-            msg = "User not found. Incorrect login or password. " \
-                  "Check whether you are registered."
-            return templates.TemplateResponse("login.html",
-                                              context={"request": request, "msg": msg})
-
         content = {"url": "/todos/read"}
         response = JSONResponse(content=content)
         response.set_cookie(key="access_token", value=token, httponly=True)
 
-    except RootException as exp:
-        response = JSONResponse(content=exp.detail)
+    except (TokenException, UserNotFoundException) as exp:
+        response = JSONResponse(content=exp.get_detail())
 
     return response
 
@@ -56,20 +50,14 @@ async def logout(request: Request, session: Session = Depends(get_session)):
     try:
         user = await get_current_user(request)
         update_user_status(user, False, session)
-
         content = {"url": "/"}
         response = JSONResponse(content=content)
         response.delete_cookie("access_token")
 
-    except RootException as exp:
-        response = JSONResponse(content=exp.detail)
+    except (TokenException, UserNotFoundException) as exp:
+        response = JSONResponse(content=exp.get_detail())
 
     return response
-
-    except HTTPException:
-        msg = "Unknown error"
-        return templates.TemplateResponse("login.html",
-                                          context={"request": request, "msg": msg})
 
 
 # -----------
