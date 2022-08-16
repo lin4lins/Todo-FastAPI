@@ -6,15 +6,11 @@ from sqlalchemy.orm import Session
 
 from Authorization.password_crypt import verify_password
 from Exceptions.TokenExceptions import IncorrectUsernameOrPasswordException
-from Exceptions.UserExceptions import UserNotFoundException
 
 
 def get_authenticated_user(username: str, password: str, session: Session) \
                                             -> Union[DatabaseUser, None]:
     user = get_user_by_username(username, session)
-    if not user:
-        raise UserNotFoundException()
-
     if not authenticate_user(user, password):
         raise IncorrectUsernameOrPasswordException()
 
