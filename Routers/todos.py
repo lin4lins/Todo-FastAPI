@@ -57,7 +57,7 @@ async def add_todo(request: Request, todo: RawTodo,
                    session: Session = Depends(get_session)):
     try:
         user = await get_active_current_user_from_request(request, session)
-        add_todo(user.id, todo, session)
+        await add_todo(user.id, todo, session)
         content = {"url": "/todos/read"}
 
     except TokenException as exp:
@@ -98,7 +98,7 @@ async def edit_todo(request: Request, todo: RawTodo, id: int = Path(...),
 
 @router.delete("/delete/{id}", response_class=JSONResponse)
 async def delete_todo(request: Request, id: int = Path(...),
-                       session: Session = Depends(get_session)):
+                      session: Session = Depends(get_session)):
     try:
         user = await get_active_current_user_from_request(request, session)
         remove_todo(id, user.id, session)
@@ -126,7 +126,3 @@ async def update_todo_completion_status(request: Request,
         content = {"error": exp.get_detail()}
 
     return JSONResponse(content=content)
-
-
-
-
