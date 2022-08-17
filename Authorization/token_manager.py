@@ -29,7 +29,7 @@ def create_access_token(username: str, user_id: int,
     if expires_delta:
         expires = datetime.timestamp(datetime.now() + expires_delta)
     else:
-        expires = datetime.timestamp(datetime.now() + timedelta(minutes=20))
+        expires = datetime.timestamp(datetime.now() + timedelta(minutes=1))
 
     encode.update({"exp": expires})
     token = jwt.encode(encode, key=key, algorithm=algorithm)
@@ -55,7 +55,7 @@ async def get_current_user(request: Request) -> CurrentUser:
 async def authorize_user(username: str, password: str, session: Session):
     authenticated_user = get_authenticated_user(username, password, session)
     update_user_status(authenticated_user, True, session)
-    return get_token(authenticated_user, expires_delta=timedelta(minutes=15))
+    return get_token(authenticated_user, expires_delta=timedelta(minutes=30))
 
 
 async def is_user_active(request: Request, session) -> bool:
