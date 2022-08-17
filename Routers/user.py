@@ -2,7 +2,8 @@ from fastapi import APIRouter, Request, Depends
 from sqlalchemy.orm import Session
 from starlette.responses import HTMLResponse, JSONResponse
 
-from Authorization.password_crypt import check_password_match,check_current_password_match
+from Authorization.password_crypt import check_password_match, \
+    check_current_password_match, update_user_password
 from Authorization.token_manager import get_active_current_user_from_request
 from Database.db_properties import get_session
 from Exceptions.TokenExceptions import TokenException
@@ -36,6 +37,7 @@ async def change_password(request: Request, session: Session = Depends(get_sessi
         await json.get_auth_data()
         await check_current_password_match(user, json.current_password, session)
         await check_password_match(json.new_password, json.new_password2)
+        await update_user_password(json.new_password, user, session)
         content = {"url": "/todos/read"}
 
     except (TokenException, PasswordNotMatchException, IncorrectPasswordException) as exp:
