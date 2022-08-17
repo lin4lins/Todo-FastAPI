@@ -1,3 +1,4 @@
+from Authorization.password_crypt import check_password_match
 from Authorization.register import register_user
 from Authorization.token_manager import authorize_user, get_current_user
 from Database.db_manager import update_user_status
@@ -5,8 +6,10 @@ from Database.db_properties import get_session
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
+from Exceptions.DBExceptions import ValueNotUniqueException
 from Exceptions.TokenExceptions import TokenException
-from Exceptions.UserExceptions import UserNotFoundException, UserException
+from Exceptions.UserExceptions import UserNotFoundException, UserException, \
+    PasswordNotMatchException
 from Models.LoginJSON import LoginJSON
 from Models.RegisterJSON import RegisterJSON
 from sqlalchemy.orm import Session
@@ -62,9 +65,15 @@ async def logout(request: Request, session: Session = Depends(get_session)):
 
 @router.post("/signin")
 async def signin(request: Request, session: Session = Depends(get_session)):
-    json = RegisterJSON(request)
-    await json.get_auth_data()
-    await register_user(json, session)
-    content = {"url": "/"}
+    try:
+        json = RegisterJSON(request)
+        await json.get_auth_data()
+        await check_password_match(json.password, json.password2)
+        await register_user(json, session)
+        content = {"url": "/"}
+
+    except (ValueNotUniqueException, PasswordNotMatchException) as exp:
+        content = {"error": exp.get_detail()}
+
     response = JSONResponse(content=content)
     return response
