@@ -39,7 +39,7 @@ async def read_todos(request: Request, session: Session = Depends(get_session)):
 
 
 @router.get("/add", response_class=HTMLResponse)
-async def add_todo(request: Request, session: Session = Depends(get_session)):
+async def create_todo(request: Request, session: Session = Depends(get_session)):
     try:
         user = await get_active_current_user_from_request(request, session)
         page = "add-todo.html"
@@ -53,11 +53,11 @@ async def add_todo(request: Request, session: Session = Depends(get_session)):
 
 
 @router.post("/add", response_class=JSONResponse)
-async def add_todo(request: Request, todo: RawTodo,
+async def create_todo(request: Request, todo: RawTodo,
                    session: Session = Depends(get_session)):
     try:
         user = await get_active_current_user_from_request(request, session)
-        await add_todo(user.id, todo, session)
+        add_todo(user.id, todo, session)
         content = {"url": "/todos/read"}
 
     except TokenException as exp:
