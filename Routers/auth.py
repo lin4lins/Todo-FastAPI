@@ -1,6 +1,5 @@
-from Authorization.password_crypt import get_password_hash
+from Authorization.register import register_user
 from Authorization.token_manager import authorize_user, get_current_user
-from Database.db_init import DatabaseUser
 from Database.db_manager import update_user_status
 from Database.db_properties import get_session
 from fastapi import APIRouter, Depends, Request
@@ -9,7 +8,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from Exceptions.TokenExceptions import TokenException
 from Exceptions.UserExceptions import UserNotFoundException, UserException
 from Models.LoginJSON import LoginJSON
-from Models.User import RawUser
+from Models.RegisterJSON import RegisterJSON
 from sqlalchemy.orm import Session
 
 from Routers.todos import templates
@@ -23,7 +22,7 @@ async def authpage(request: Request):
     return templates.TemplateResponse(name="login.html", context={"request": request})
 
 
-@router.get("/register", response_class=HTMLResponse)
+@router.get("/signin", response_class=HTMLResponse)
 async def regpage(request: Request):
     return templates.TemplateResponse(name="register.html", context={"request": request})
 
@@ -61,14 +60,11 @@ async def logout(request: Request, session: Session = Depends(get_session)):
     return response
 
 
-# -----------
-@router.post("/signin", status_code=201)
-async def create_user(user: RawUser, session: Session = Depends(get_session)) -> dict:
-    hashed_password = get_password_hash(user.password)
-    user_to_add = DatabaseUser(email=user.email, username=user.username,
-                               first_name=user.first_name, last_name=user.last_name,
-                               hashed_password=hashed_password, is_active=True)
-    session.add(user_to_add)
-    session.flush()
-    session.commit()
-    return {"Message": "User has been created successfully", "id": user_to_add.id}
+@router.post("/signin")
+async def signin(request: Request, session: Session = Depends(get_session)):
+    json = RegisterJSON(request)
+    await json.get_auth_data()
+    await register_user(json, session)
+    content = {"url": "/"}
+    response = JSONResponse(content=content)
+    return response
