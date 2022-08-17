@@ -10,3 +10,10 @@ class UserTodoNotFound(DBException):
 
     def __init__(self):
         self.detail = f"You do not have this todo"
+
+
+class ValueNotUniqueException(DBException):
+    """ Raises if user with some username is already exist in database """
+
+    def __init__(self):
+        self.detail = f"User with this email or username is already registered"

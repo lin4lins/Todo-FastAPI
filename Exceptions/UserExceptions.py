@@ -24,3 +24,10 @@ class UserNotFoundException(UserException):
 
         if not user_id and not username:
             self.detail = f"User is not registered"
+
+
+class PasswordNotMatchException(UserException):
+    """ Raises if input passwords do not match"""
+
+    def __init__(self):
+        self.detail = "Passwords do not match!"
