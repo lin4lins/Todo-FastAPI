@@ -25,11 +25,11 @@ def get_todo_by_id_and_user_id(todo_id: int, user_id: int, session: Session) \
     return todo
 
 
-def create_todo(user_id: int, todo: RawTodo, session: Session) -> None:
-    todo_to_create = DatabaseTodo(title=todo.title, description=todo.description,
+def add_todo(user_id: int, todo: RawTodo, session: Session) -> None:
+    todo_to_add = DatabaseTodo(title=todo.title, description=todo.description,
                                   priority=todo.priority, complete=todo.complete,
                                   owner_id=user_id)
-    session.add(todo_to_create)
+    session.add(todo_to_add)
     session.flush()
     session.commit()
 
@@ -43,7 +43,8 @@ def update_todo(todo_id: int, user_id: int, todo: RawTodo, session: Session) -> 
     session.commit()
 
 
-def update_todo_status(todo_id: int, user_id: int, is_complete: bool, session: Session) -> None:
+def update_todo_status(todo_id: int, user_id: int, is_complete: bool,
+                       session: Session) -> None:
     todo_to_update = get_todo_by_id_and_user_id(todo_id, user_id, session)
     todo_to_update.complete = is_complete
     session.commit()
@@ -93,7 +94,6 @@ def update_user_password(user: CurrentUser, password: str, session: Session) -> 
     user_to_update = get_user_by_id_and_username(user.id, user.username, session)
     user_to_update.hashed_password = password
     session.commit()
-    return
 
 
 def delete_user(user: CurrentUser, session: Session) -> None:
@@ -108,7 +108,6 @@ def update_user_status(user: Union[DatabaseUser, CurrentUser],
     user_to_update = get_user_by_id_and_username(user.id, user.username, session)
     user_to_update.is_active = is_active
     session.commit()
-    return
 
 
 def get_user_status(user: CurrentUser, session: Session):
