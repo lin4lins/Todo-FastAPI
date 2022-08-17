@@ -3,7 +3,7 @@ from typing import Union
 from Exceptions.DBExceptions import UserTodoNotFound
 from Exceptions.UserExceptions import UsersNotFoundException, UserNotFoundException
 from Models.Todo import RawTodo
-from Models.User import CurrentUser
+from Models.User import CurrentUser, RawUser
 from sqlalchemy.orm import Session
 
 from Database.db_init import DatabaseTodo, DatabaseUser
@@ -88,6 +88,15 @@ def get_user_by_id_and_username(id: int, username: str, session: Session) -> Dat
         raise UserNotFoundException()
 
     return user
+
+
+def add_user(user: RawUser, session: Session) -> None:
+    user_to_add = DatabaseUser(email=user.email, username=user.username,
+                               first_name=user.first_name, last_name=user.last_name,
+                               hashed_password=user.password, is_active=user.is_active)
+    session.add(user_to_add)
+    session.flush()
+    session.commit()
 
 
 def update_user_password(user: CurrentUser, password: str, session: Session) -> None:
