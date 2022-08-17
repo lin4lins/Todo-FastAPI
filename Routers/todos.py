@@ -1,7 +1,7 @@
 from starlette.responses import JSONResponse
 
 from Authorization.token_manager import get_active_current_user_from_request
-from Database.db_manager import (create_todo, remove_todo,
+from Database.db_manager import (add_todo, remove_todo,
                                  get_todo_by_id_and_user_id,
                                  update_todo, update_todo_status,
                                  get_all_user_todos_by_user_id)
@@ -29,7 +29,7 @@ async def read_todos(request: Request, session: Session = Depends(get_session)):
         user = await get_active_current_user_from_request(request, session)
         todos = get_all_user_todos_by_user_id(user.id, session)
         page = "home.html"
-        context = {"request": request, "todos": todos, 'is_authorized': True}
+        context = {"request": request, "todos": todos, 'is_active': True}
 
     except TokenException:
         page = "error.html"
@@ -57,7 +57,7 @@ async def add_todo(request: Request, todo: RawTodo,
                    session: Session = Depends(get_session)):
     try:
         user = await get_active_current_user_from_request(request, session)
-        create_todo(user.id, todo, session)
+        add_todo(user.id, todo, session)
         content = {"url": "/todos/read"}
 
     except TokenException as exp:
