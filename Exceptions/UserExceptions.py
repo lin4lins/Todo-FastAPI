@@ -31,3 +31,10 @@ class PasswordNotMatchException(UserException):
 
     def __init__(self):
         self.detail = "Passwords do not match!"
+
+
+class IncorrectPasswordException(UserException):
+    """ Raises if input password is incorrect"""
+
+    def __init__(self):
+        self.detail = "Incorrect password"
