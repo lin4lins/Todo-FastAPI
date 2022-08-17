@@ -25,8 +25,7 @@ function register() {
     "last_name": document.getElementById("last-name").value,
     "password": document.getElementById("password").value,
     "password2": document.getElementById("password2").value
-    };
+    }
 
     send_http_request(method, url, signin_data);
-}
 }
