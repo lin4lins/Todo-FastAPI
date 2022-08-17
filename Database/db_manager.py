@@ -99,17 +99,10 @@ def add_user(user: RawUser, session: Session) -> None:
     session.commit()
 
 
-def update_user_password(user: CurrentUser, password: str, session: Session) -> None:
+def update_password(user: CurrentUser, password: str, session: Session) -> None:
     user_to_update = get_user_by_id_and_username(user.id, user.username, session)
     user_to_update.hashed_password = password
     session.commit()
-
-
-def delete_user(user: CurrentUser, session: Session) -> None:
-    user_to_update = get_user_by_id_and_username(user.id, user.username, session)
-    session.delete(user_to_update)
-    session.commit()
-    return
 
 
 def update_user_status(user: Union[DatabaseUser, CurrentUser],
