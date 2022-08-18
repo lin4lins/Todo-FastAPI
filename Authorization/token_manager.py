@@ -31,6 +31,7 @@ def create_access_token(username: str, user_id: int,
         expires = datetime.timestamp(datetime.now() + timedelta(minutes=1))
 
     encode.update({"exp": expires})
+    print(key, algorithm)
     token = jwt.encode(encode, key=key, algorithm=algorithm)
     return token
 
