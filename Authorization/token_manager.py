@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional
 
-from jwt import ExpiredSignatureError
+from jwt import PyJWTError
 from sqlalchemy.orm import Session
 
 from Authorization.autentification import get_authenticated_user
@@ -48,7 +48,7 @@ async def get_current_user(request: Request) -> CurrentUser:
 
         return CurrentUser(id=user_id, username=username)
 
-    except (AttributeError, ExpiredSignatureError, JWTError):
+    except (AttributeError, PyJWTError, JWTError):
         raise TokenException()
 
 
