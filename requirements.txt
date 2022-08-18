@@ -27,3 +27,4 @@ SQLAlchemy==1.4.40
 starlette==0.19.1
 typing_extensions==4.3.0
 uvicorn==0.18.2
+psycopg2==2.9.3
