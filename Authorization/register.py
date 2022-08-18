@@ -17,4 +17,3 @@ async def register_user(json: RegisterJSON, session: Session):
 
     except IntegrityError:
         raise ValueNotUniqueException()
-
